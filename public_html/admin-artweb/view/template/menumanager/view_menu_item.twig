@@ -1,0 +1,431 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        <a href="{{ addmenu }}" data-toggle="tooltip" title="Добавить меню" class="btn btn-primary"><i class="fa fa-plus"></i> Добавить меню</a>
+        <a href="{{ addmenuitem }}" data-toggle="tooltip" title="Добавить пункт меню" class="btn btn-primary"><i class="fa fa-plus"></i> Добавить пункт меню</a>
+        <a href="{{ viewitem }}" data-toggle="tooltip" title="Все пункты меню" class="btn btn-primary">Все пункты меню</a>
+      </div>
+
+      <h1>{{ heading_title }}</h1>
+
+      <div class="breadcrumb">
+        {% for breadcrumb in breadcrumbs %}
+        {{ breadcrumb.separator }}<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="container-fluid">
+
+    {% if error_warning %}
+      <div class="warning">{{ error_warning }}</div>
+    {% endif %}
+    {% if success %}
+      <div class="success">{{ success }}</div>
+    {% endif %}
+
+
+    <div class="content">
+      <div class="row">
+
+        <div class="col-sm-4 col-xs-12">
+            <div class="col-sm-4 col-xs-12">
+                <label class="control-label" for="menu_id">Фильтровать пункты по меню</label>
+            </div>
+            <div class="col-sm-8 col-xs-12">
+              <select class="form-control" name="menu_id" id="menu_id">
+                <option value="0">Выберите меню</option>
+                <option value="{{ viewitem }}">Все</option>
+                {% for menu in menus %}
+                  <option {{ (app.request.query.get("menu_id") and  app.request.query.get("page")== menu.id ) ? 'selected' : '' }}   value="{{ viewitem }}&menu_id={{ menu.id }}">{{ menu.name }}</option>
+                {% endfor %}
+              </select>
+
+            </div>
+        </div>
+
+        <div class="col-sm-4 col-xs-12">
+          <button id="save_menu_item_sort" data-toggle="tooltip" class="btn btn-primary" data-original-title="Сохранить сортировку"><i class="fa fa-save"> Сохранить сортировку</i></button>
+        </div>
+
+      </div>
+
+
+      <form action="{{ delete }}" method="post" enctype="multipart/form-data" id="form">
+        <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+          <thead>
+            <tr align="center">
+                <td style="padding: 5px;">ID</td>
+                <td style="padding: 5px;">Состояние</td>
+                <td style="padding: 5px;">Текст ссылки</td>
+                <td style="padding: 5px;">Title</td>
+                <td style="padding: 5px;">Href</td>
+                <td style="padding: 5px;">Target</td>
+                <td style="padding: 5px;">Sort</td>
+                <td style="padding: 5px;">Class</td>
+                <td style="padding: 5px;">User code</td>
+                <td style="padding: 5px;">Действие</td>
+            </tr>
+          </thead>
+          <tbody>
+            {% if menu_item %}
+            {% for item in menu_item %}
+            <tr id="item_{{ item.id }}" align="center">
+              <td style="padding: 5px;">{{ item.id }}</td>
+
+              <td style="padding: 5px;">
+                {% if item.status == 0 %}
+                  <input type="checkbox" class="status" />
+                {% else %}
+                  <input type="checkbox" class="status" checked />
+                {% endif %}
+              </td>
+
+              <td style="padding: 5px; font-weight: bold; font-size: 1.1em; text-align: left;">
+                <a title="Редактировать" href="{{ addmenuitem }}&menu_item_id={{ item.id }}">{{ item.link_text }}</a>
+              </td>
+              <td style="padding: 5px;">{{ item.title }}</td>
+              <td style="padding: 5px;">{{ item.href }}</td>
+              <td style="padding: 5px;">{{ item.target }}</td>
+              <td style="padding: 5px;">
+                <input type="hidden" value="{{ item.id }}" class="menu_sort_id" />
+                <input class="menu_sort_value" style="width: 25px;" type="text" value="{{ item.sort }}" />
+              </td>
+              <td style="padding: 5px;">{{ item.class }}</td>
+              <td style="padding: 5px;">{{ item.user_code }}</td>
+              <td style="padding: 5px;">
+                <a href="{{ addmenuitem }}&menu_item_id={{ item.id }}" class="" href="#">Изменить</a>
+                &nbsp;|&nbsp;
+                <a url="{{ delmenuitem }}" data="{{ item.id }}" class="delMenu" href="#">Удалить</a>
+              </td>
+            </tr>
+
+            {% if item.children %}
+              {% for child in item.children %}
+                <tr id="item_{{ child.id }}" align="center">
+                  <td style="padding: 5px;">{{ child.id }}</td>
+
+                  <td style="pading: 5px;">
+                    {% if child.status==0 %}
+                      <input type="checkbox" class="status" />
+                    {% else %}
+                      <input type="checkbox" class="status" checked />
+                    {% endif %}
+                  </td>
+
+
+
+
+                  <td style="padding: 5px; text-align: left;">
+                    <a style='margin-left: 20px;' title="Редактировать" href="{{ addmenuitem }}&menu_item_id={{ child.id }}">{{ child.link_text }}</a>
+                  </td>
+                  <td style="padding: 5px;">{{ child.title }}</td>
+                  <td style="padding: 5px;">
+                  <?php if(preg_match('|^\d+$|', $child['href'])) {
+                    if($child['source_type']=='category'){
+                        echo "index.php?route=product/category&path=".$child['href'];
+                    } else if($child['source_type']=='product') {
+                        echo "index.php?route=product/product&product_id=".$child['href'];
+                    } else if($child['source_type']=='information') {
+                        echo "index.php?route=product/information&information_id=".$child['href'];
+                    }
+                  } else {
+                    echo $child['href'];
+                  } ?>
+                  </td>
+                  <td style="padding: 5px;">{{ child.target }}</td>
+                  <td style="padding: 5px;">
+                    <input type="hidden" value="{{ child.id }}" class="menu_sort_id" />
+                    <input class="menu_sort_value" style="width: 25px;" type="text" value="{{ child.sort }}" />
+                  </td>
+                  <td style="padding: 5px;">{{ child.class }}</td>
+                  <td style="padding: 5px;">{{ child.user_code }}</td>
+                  <td style="padding: 5px;">
+                    <a href="{{ addmenuitem }}&menu_item_id={{ child.id }}" class="" href="#">Изменить</a>
+                    &nbsp;|&nbsp;
+                    <a url="{{ delmenuitem }}" data="{{ child.id }}" class="delMenu" href="#">Удалить</a>
+                  </td>
+                </tr>
+                  <?php
+
+
+                        if($child['children']){
+                            foreach ($child['children'] as $child2) { ?>
+                            <tr id="item_{{ child2.id }}" align="center">
+                                <td style="padding: 5px;">{{ child2.id }}</td>
+                                <td style="padding: 5px;">
+                                    <?php
+                                    if($child2['status']==0){ ?>
+                                        <input type="checkbox" class="status" />
+                                    <?php  } else { ?>
+                                        <input type="checkbox" class="status" checked />
+                                    <?php }
+                                    ?>
+                                  </td>
+                              <td style="padding: 5px; font-size: 0.9em; text-align: left;"><a style='margin-left: 40px;' title="Редактировать" href="{{ addmenuitem }}&menu_item_id={{ child2.id }}">{{ child2.link_text }}</a></td>
+                              <td style="padding: 5px;">{{ child2.title }}</td>
+                              <td style="padding: 5px;">
+                              <?php if(preg_match('|^\d+$|', $child2['href'])) {
+                                if($child2['source_type']=='category'){
+                                    echo "index.php?route=product/category&path=".$child2['href'];
+                                } else if($child2['source_type']=='product') {
+                                    echo "index.php?route=product/product&product_id=".$child2['href'];
+                                } else if($child2['source_type']=='information') {
+                                    echo "index.php?route=product/information&information_id=".$child2['href'];
+                                }
+                              } else {
+                                echo $child2['href'];
+                              } ?>
+                              </td>
+                              <td style="padding: 5px;">{{ child2.target }}</td>
+                              <td style="padding: 5px;"><input type="hidden" value="{{ child2.id }}" class="menu_sort_id" /><input class="menu_sort_value" style="width: 25px;" type="text" value="{{ child2.sort }}" /></td>
+                              <td style="padding: 5px;">{{ child2.class }}</td>
+                              <td style="padding: 5px;">{{ child2.user_code }}</td>
+                              <td style="padding: 5px;">
+                                <a href="{{ addmenuitem }}&menu_item_id={{ child2.id }}" class="" href="#">Изменить</a>&nbsp;|&nbsp;
+                                <a url="{{ delmenuitem }}" data="{{ child2.id }}" class="delMenu" href="#">Удалить</a>
+                              </td>
+                            </tr>
+                    <?php
+                        } // Foreach
+                    }// Child2
+                   ?>
+
+
+              {% endfor %}
+            {% endif %}
+
+            {% endfor %}
+            {% else %}
+              <tr>
+                <td class="center" colspan="11">Пунктов меню не найдено!</td>
+              </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+      </form>
+      <!--<div class="pagination">{{ pagination }}</div>-->
+    </div>
+  </div>
+</div>
+
+<script><!--
+$(document).ready(function(){
+
+// Удаление меню
+
+$('.delMenu').click(function(eventObject){
+    eventObject.preventDefault();
+
+    var id = $(this).attr('data');
+    var url = $(this).attr('url');
+    var q = confirm("Вы действительно желаете удалить пункт меню?");
+
+
+    if(q){
+        $.ajax({
+          type: 'post',
+          url: url,
+          data: ({id:id}),
+          beforeSend: function(){
+              $("#item_"+id+" td").css({'background':'#fee2e1'});
+          },
+          dataType: 'json',
+          success: function(data){
+              $(".success, .warning").remove();
+              if(data.success){
+                  $("#item_"+id).remove();
+                  $(".breadcrumb").after("<div class='success'>Пункт меню удален</div>");
+              } else {
+                  $(".breadcrumb").after("<div class='warning'>Произошла ошибка. Пункт меню не удален!</div>");
+              }
+          }
+        });
+    }
+
+
+});
+
+
+// Фильтр по меню
+
+$("#menu_id").change(function(){
+    var url = $(this).attr('value');
+    window.location.href = url;
+});
+
+
+
+$('#save_menu_item_sort').click(function(eventObject){
+    eventObject.preventDefault();
+
+    var url="{{ sortmenuitem }}";
+
+    var menu_item_sort = {};
+
+    $(".menu_sort_value").each(function(){
+        menu_item_sort[$(this).prev('.menu_sort_id').val()]=$(this).val();
+    });
+
+    console.log(url);
+    console.log(menu_item_sort);
+
+
+
+    $.ajax({
+            type: 'POST',
+            url: url,
+            data: ({menu_item_sort:menu_item_sort}),
+            dataType: 'json',
+            success: function(data){
+                if(data.success){
+                    window.location.href=window.location.href;
+                } else {
+
+                }
+            }
+    });
+
+});
+
+
+$(".status").click(function(){
+    var id = $(this).parent().prev('td').text();
+
+    if($(this).is(":checked")){
+        var status = 1;
+    } else {
+        var status = 0;
+    }
+
+    var url="{{ setstatus }}";
+
+    console.log(url);
+
+    $.ajax({
+            type: 'POST',
+            url: url,
+            data: ({id:id, status:status}),
+            dataType: 'json',
+            success: function(data){
+                $(".success, .warning").remove();
+                if(data.success){
+                    $(".breadcrumb").after("<div class='success'>Состояние изменено!</div>");
+                } else {
+                    $(".breadcrumb").after("<div class='warning'>Произошла ошибка! Состояние не изменено!</div>");
+                }
+            }
+    });
+
+});
+
+
+}); // Ready
+</script>
+
+
+<script type="text/javascript"><!--
+function filter() {
+	url = 'index.php?route=catalog/product&token={{ token }}';
+
+	var filter_name = $('input[name=\'filter_name\']').attr('value');
+
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	}
+
+	var filter_model = $('input[name=\'filter_model\']').attr('value');
+
+	if (filter_model) {
+		url += '&filter_model=' + encodeURIComponent(filter_model);
+	}
+
+	var filter_price = $('input[name=\'filter_price\']').attr('value');
+
+	if (filter_price) {
+		url += '&filter_price=' + encodeURIComponent(filter_price);
+	}
+
+	var filter_quantity = $('input[name=\'filter_quantity\']').attr('value');
+
+	if (filter_quantity) {
+		url += '&filter_quantity=' + encodeURIComponent(filter_quantity);
+	}
+
+	var filter_status = $('select[name=\'filter_status\']').attr('value');
+
+	if (filter_status != '*') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = url;
+}
+//--></script>
+<script type="text/javascript"><!--
+$('#form input').keydown(function(e) {
+	if (e.keyCode == 13) {
+		filter();
+	}
+});
+//--></script>
+<script type="text/javascript"><!--
+$('input[name=\'filter_name\']').autocomplete({
+	delay: 0,
+	source: function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&token={{ token }}&filter_name=' +  encodeURIComponent(request.term),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item.name,
+						value: item.product_id
+					}
+				}));
+			}
+		});
+	},
+	select: function(event, ui) {
+		$('input[name=\'filter_name\']').val(ui.item.label);
+
+		return false;
+	},
+	focus: function(event, ui) {
+      	return false;
+   	}
+});
+
+$('input[name=\'filter_model\']').autocomplete({
+	delay: 0,
+	source: function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&token={{ token }}&filter_model=' +  encodeURIComponent(request.term),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item.model,
+						value: item.product_id
+					}
+				}));
+			}
+		});
+	},
+	select: function(event, ui) {
+		$('input[name=\'filter_model\']').val(ui.item.label);
+
+		return false;
+	},
+	focus: function(event, ui) {
+      	return false;
+   	}
+});
+//--></script>
+{{ footer }}

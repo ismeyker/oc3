@@ -1,0 +1,24 @@
+.navbar{
+	padding: 0px;
+	margin: 0px 0px 30px;
+	border: none;
+	border-radius: $borderRadius;
+	background: transparent;
+	box-shadow: none;
+	 li a{
+	 	text-shadow: none;
+	 }
+}
+.navbar-nav{
+	margin: 0px;
+}
+.navbar-brand{
+	cursor: pointer;
+}
+.navbar-toggle{
+	background: transparent !important;
+	border: none;
+	.icon-bar{
+		background: #fff;
+	}
+}

@@ -1,0 +1,461 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    {{ breadcrumb.separator }}<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+    {% endfor %}
+  </div>
+
+
+  {% if error_warning %}
+     <div class="warning">{{ error_warning }}</div>
+  {% endif %}
+  {% if success %}
+    <div class="success">{{ success }}</div>
+  {% endif %}
+
+  <div id="post"></div>
+
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        {% if not menu_item %}
+          <button id="addMenuItem" data-toggle="tooltip" class="btn btn-primary actionToMenuItem" data-original-title="Сохранить">
+            <i class="fa fa-save"></i>
+          </button>
+        {% else %}
+          <button id="changeMenuItem" data-toggle="tooltip" class="btn btn-primary actionToMenuItem" data-original-title="Сохранить">
+            <i class="fa fa-save"></i>
+          </button>
+        {% endif %}
+
+        <a href="{{ cancel }}" data-toggle="tooltip" title="" class="btn btn-default" data-original-title="Отменить"><i class="fa fa-reply"></i></a>
+
+        <a href="{{ addmenu }}" data-toggle="tooltip" title="Добавить меню" class="btn btn-primary"><i class="fa fa-plus"></i> Добавить меню</a>
+        <a href="{{ addmenuitem }}" data-toggle="tooltip" title="Добавить пункт меню" class="btn btn-primary"><i class="fa fa-plus"></i> Добавить пункт меню</a>
+        <a href="{{ viewitem }}" data-toggle="tooltip" title="Все пункты меню" class="btn btn-primary">Все пункты меню</a>
+      </div>
+      <h1>{{ heading_title }}</h1>
+    </div>
+  </div>
+
+
+
+  <div class="container-fluid">
+    <div class="content panel panel-default">
+      <form method="post" enctype="multipart/form-data" id="addMenuItemForm">
+        <!-- L-C -->
+        <div class="col-sm-6 col-xs-12">
+            <!-- Текст ссылки -->
+            <div class="form-group required">
+                <label for="link_text" class="col-sm-12 control-label">Текст ссылки</label>
+                <div class="">
+                  <input type="text" class="form-control" id="link_text" value="{{ menu_item.link_text ? menu_item.link_text : '' }}" />
+                </div>
+            </div>
+            <!-- / Текст ссылки -->
+
+            <!-- Title -->
+            <div class="form-group required">
+                <label for="attr_title" class="col-sm-12 control-label">Title</label>
+                <div class="">
+                  <input class="form-control" type="text" id="attr_title" value="{{ menu_item.title ? menu_item.title : '' }}" />
+                </div>
+            </div>
+            <!-- / Title -->
+
+            <!-- Тип ресурса -->
+
+            <div class="form-group">
+              <label class="col-sm-12 control-label" for="source_type">Тип ресурса</label>
+              <div class="">
+                <select class="form-control" id="source_type">
+                  <option title="{{ constant('HTTP_CATALOG') }}" value="0">Выберите тип ресурса</option>
+                  <option {{ (menu_item.source_type and menu_item.source_type == 'main') ? 'selected' : '' }} title="{{ constant('HTTP_CATALOG') }}" value="main">Главная</option>
+                  <option {{ (menu_item.source_type and menu_item.source_type == 'category') ? 'selected' : '' }} title="{{ constant('HTTP_CATALOG') }}index.php?route=product/category&path=" value="category">Категория</option>
+                  <option {{ (menu_item.source_type and menu_item.source_type == 'information') ? 'selected' : '' }} title="{{ constant('HTTP_CATALOG') }}index.php?route=information/information&information_id=" value="information">Статья</option>
+                  <option {{ (menu_item.source_type and menu_item.source_type == 'product') ? 'selected' : '' }} title="{{ constant('HTTP_CATALOG') }}index.php?route=product/product&path=" value="product">Продукт</option>
+                  <option {{ (menu_item.source_type and menu_item.source_type == 'out') ? 'selected' : '' }} title="{{ constant('HTTP_CATALOG') }}" value="out">Внешний url</option>
+                  <option {{ (menu_item.source_type and menu_item.source_type == 'separator') ? 'selected' : '' }} title="{{ constant('HTTP_CATALOG') }}" value="separator">Разделитель</option>
+                </select>
+              </div>
+            </div>
+            <!-- / Тип ресурса -->
+
+            <!-- Href -->
+            <div class="form-group required">
+              <label class="col-sm-12 control-label href_caption" for="href">Href</label>
+              <div class="">
+                  <div id="link_example" style="margin: 5px 0px; line-height: 1.2;">{{ link_example }}</div>
+                  <input class="form-control" style="{{ (menu_item.source_type and menu_item.source_type == 'main') ? 'display: none;' : '' }}" type="text" id="href" value="{{ menu_item.href ? menu_item.href : '' }}" />
+              </div>
+            </div>
+            <!-- / Href -->
+
+            <!-- target -->
+            <div class="form-group">
+              <label class="col-sm-12 control-label" for="target">Target</label>
+              <div class="">
+                <select class="form-control"  id="target">
+                  <option {{ (menu_item.target and menu_item.target == '_self') ? 'selected' : '' }} value="_self">_self</option>
+                  <option {{ (menu_item.target and menu_item.target == '_blank') ? 'selected' : '' }} value="_blank">_blank</option>
+                </select>
+              </div>
+            </div>
+            <!-- / target -->
+
+            <!-- Сортировка -->
+            <div class="form-group">
+              <label class="col-sm-12 control-label href_caption" for="sortMenu">Сортировка</label>
+              <div class="">
+                <input class="form-control" type="text" id="sortMenu" value="{{ menu_item.sort ? menu_item.sort : 0 }}" />
+              </div>
+            </div>
+            <!-- / Сортировка -->
+
+            <!-- Class -->
+            <div class="form-group">
+              <label class="col-sm-12 control-label href_caption" for="class_menu_item">CSS Class</label>
+              <div class="">
+                <input class="form-control" type="text" id="class_menu_item" value="{{ menu_item.class ? menu_item.class : '' }}" />
+              </div>
+            </div>
+            <!-- / Class -->
+        </div>
+        <!-- / L-C -->
+
+        <!-- R-C -->
+        <div class="col-sm-6 col-xs-12">
+            <!-- Меню -->
+            <div class="form-group required">
+              <label class="col-sm-12 control-label" for="menu_for_item">Меню</label>
+              <div class="">
+                <select class="form-control"  id="menu_for_item">
+                  <option value="0">Выберите меню</option>
+                  {% for menu in menus %}
+                    <option {{ (menu_item.menu_id and menu_item.menu_id == menu.id) ? 'selected' : '' }} value="{{ menu.id }}">{{ menu.name }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            </div>
+            <!-- / Меню -->
+
+            <!-- Родительский пункт меню -->
+            <div class="form-group required">
+              <label class="col-sm-12 control-label" for="parent_menu_item">Родительский пункт меню</label>
+              <div class="">
+                {% if menu_item_list %}
+                  <select class="form-control" id="parent_menu_item">
+                    <option value="0">Главный пункт меню</option>
+                    <?php foreach($menu_item_list as $item) {
+                    {% for item in menu_item_list %}
+                      {% if item.id != menu_item.id %}
+                        <option {{ (menu_item.parent_id and menu_item.parent_id == item.id) ? 'selected' : '' }} value="{{ item.id }}">{{ item.link_text }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                {% else %}
+                  <select class="form-control" id="parent_menu_item">
+                    <option value="0">Главный пункт меню</option>
+                    {% for item in menus_items %}
+                      <option {{ (menu_item.parent_id and menu_item.parent_id == item.id) ? 'selected' : '' }} value="{{ item.id }}">{{ item.link_text }}</option>
+                    {% endfor %}
+                  </select>
+                {% endif %}
+              </div>
+            </div>
+            <!-- / Родительский пункт меню -->
+
+
+            <!-- Произвольный код -->
+            <div class="form-group">
+              <label class="col-sm-12 control-label" for="user_code">Произвольный код</label>
+              <div class="">
+                  <textarea class="form-control" id="user_code" rows="6">{{ menu_item.user_code ? menu_item.user_code : '' }}</textarea>
+              </div>
+            </div>
+            <!-- / Произвольный код -->
+
+            <!-- Состояние -->
+            <div class="form-group required">
+              <label class="col-sm-12 control-label" for="status">Состояние</label>
+              <div class="">
+                <select class="form-control" id="status">
+                  <option {{ (menu_item.status and menu_item.status == 1) ? 'selected' : '' }} value="1">Опубликовано</option>
+                  <option {{ (menu_item.status and menu_item.status == 0) ? 'selected' : '' }} value="0">Не опубликовано</option>
+                </select>
+              </div>
+            </div>
+            <!-- / Состояние -->
+          </div>
+        </form>
+    </div>
+  </div>
+</div>
+
+<script><!--
+$(document).ready(function(){
+
+  /* >>> Выбор тип ресурса */
+  var no_select = "";
+  var category_example = "{{ constant('HTTP_CATALOG') }}index.php?route=product/category&path=";
+  var product_example = "{{ constant('HTTP_CATALOG') }}index.php?route=product/product&product_id=";
+  var information_example = "{{ constant('HTTP_CATALOG') }}index.php?route=product/information&information_id=";
+  var main_page = "{{ constant('HTTP_CATALOG') }}";
+
+
+  $("#menu_for_item").change(function(){
+      var menu_id = $(this).val();
+      var url="{{ getmenuitem }}";
+
+      $.ajax({
+        type: 'POST',
+        url: url,
+        data: ({menu_id : menu_id}),
+        beforeSend: function(){
+            $("#parent_menu_item").attr('disabled', true);
+            $("#parent_menu_item").after("<span style='margin-left: 10px; color: green;' id='load_menu_item'>Загрузка, пожалуйста подождите!</span>");
+        },
+        dataType: 'json',
+        success: function(data){
+            $("#load_menu_item").remove();
+            if(data.success){
+                $("#parent_menu_item").html('').html(data.item);
+                $("#parent_menu_item").attr('disabled', false);
+            } else {
+                $("#parent_menu_item option:not(:first)").remove();
+                $("#parent_menu_item").attr('disabled', false);
+            }
+
+        }
+      });
+  });
+
+$("#source_type").change(function(){
+   var source = $(this).val();
+
+   if(source=='0'){
+        $("#link_example").text('');
+        $("#href").val('');
+        $("#href").show().attr('placeholder','Выберите тип ресурса');
+   } else if(source=='category'){
+        $(".href_caption").show();
+        $("#link_example").text(category_example);
+        $("#href").val('');
+        $("#href").show().attr('placeholder','Введите id категории');
+   } else if(source=='product'){
+        $(".href_caption").show();
+        $("#link_example").text(product_example);
+        $("#href").val('');
+        $("#href").show().attr('placeholder','Введите id продукта');
+   } else if(source=='information'){
+        $(".href_caption").show();
+        $("#link_example").text(information_example);
+        $("#href").val('');
+        $("#href").show().attr('placeholder','Введите id статьи');
+   } else if(source=='out'){
+        $(".href_caption").show();
+        $("#link_example").text(no_select);
+        $("#href").val('');
+        $("#href").show().attr('placeholder','Введите url');
+   } else if(source=='main'){
+        var url_main = main_page.replace('','');
+        $("#link_example").text(""+url_main);
+        $("#href").hide().val(url_main);;
+   } else if(source=='separator'){
+        var url_main = '';
+        $("#link_example").text("");
+        $("#href").hide().val('');
+        $(".href_caption").hide();
+   }
+
+});
+
+/* <<< Выбор тип ресурса */
+
+
+$('.actionToMenuItem').click(function(eventObject){
+    eventObject.preventDefault();
+    $(".error").remove();
+
+    if($(this).attr('id')=='addMenuItem'){
+        var action = 'add';
+        var id = false;
+    } else if($(this).attr('id')=='changeMenuItem'){
+        var action = 'change';
+        var id = "{{ menu_item.id ? menu_item.id : 'false' }}";
+    }
+
+    var link_text=$("#link_text");
+    var attr_title=$("#attr_title");
+    var source_type=$("#source_type");
+    var user_code=$("#user_code");
+    var href=$("#href");
+    var menu_for_item=$("#menu_for_item");
+    var parent_menu_item=$("#parent_menu_item");
+    var target=$("#target");
+    var sortMenu=$("#sortMenu");
+    var class_menu_item=$("#class_menu_item");
+    var status = $("#status");
+
+
+    var url = "{{ add }}";
+    var url_menu_list = "{{ url_menu_list }}";
+    var url_refresh_item = "{{ getmenuitem }}";
+
+    // console.log(url);
+    // console.log('----------------------------------------------')
+    // var url="/admin/index.php?route=menumanager/add/addmenuitem&token=<?php echo $this->request->get['token']; ?>";
+    // var url_menu_list="/admin/index.php?route=menumanager/view&token=<?php echo $this->request->get['token']; ?>";
+    // var url_refresh_item="/admin/index.php?route=menumanager/getmenuitem&token=<?php echo $this->request->get['token']; ?>";
+
+    var errFlag = false;
+
+    if(link_text.val()!=''){
+        if(link_text.val().length<=200){
+            errFlag = true;
+        } else {
+            errFlag = false;
+            link_text.after("<div class='error' style='color: #A60000;'>Максимальная длина поля 200 символов</div>");
+            return;
+        }
+    } else {
+        errFlag = false;
+        link_text.after("<div class='error' style='color: #A60000;'>Заполните поле</div>");
+        return;
+    }
+
+
+    if(attr_title.val()!=''){
+        if(attr_title.val().length>80){
+            errFlag = false;
+            attr_title.after("<div class='error' style='color: #A60000;'>Максимальная длина поля 80 символов</div>");
+            return;
+        }
+    }
+
+    if(source_type.val()!='0'){
+        errFlag = true;
+    } else {
+        errFlag = false;
+        source_type.after("<div class='error' style='color: #A60000;'>Выберите тип ресурса</div>");
+        return;
+    }
+
+    if(href.val()!=''){
+        errFlag = true;
+    } else {
+        errFlag = false;
+        href.after("<div class='error' style='color: #A60000;'>Заполните поле</div>");
+        return;
+    }
+
+    if(sortMenu.val()!=''){
+        errFlag = true;
+    } else {
+        errFlag = false;
+        sortMenu.after("<div class='error' style='color: #A60000;'>Заполните поле</div>");
+        return;
+    }
+
+    if(menu_for_item.val()!='0'){
+        errFlag = true;
+    } else {
+        errFlag = false;
+        menu_for_item.after("<div class='error' style='color: #A60000;'>Выберите меню</div>");
+        return;
+    }
+
+
+    if(user_code.val()!=''){
+        if(user_code.val().length>100){
+            errFlag = false;
+            user_code.after("<div class='error' style='color: #A60000;'>Максимальная длина поля 100 символов</div>");
+            return;
+        }
+    }
+
+
+    if(errFlag){
+        $.ajax({
+          type: 'POST',
+          url: url,
+          data: ({link_text:link_text.val(),
+                   attr_title : attr_title.val(),
+                   source_type : source_type.val(),
+                   href : href.val(),
+                   menu_for_item : menu_for_item.val(),
+                   parent_menu_item : parent_menu_item.val(),
+                   user_code : user_code.val(),
+                   status : status.val(),
+                   target : target.val(),
+                   sortMenu : sortMenu.val(),
+                   class_menu_item : class_menu_item.val(),
+                   action : action,
+                   id : id
+          }),
+          dataType: 'json',
+          success: function(data){
+            $(".success, .warning").remove();
+            if(data.success){
+              if(action=='add'){
+                  $("#addMenuItemForm").slideUp(300);
+                  $(".content").prepend("<div id='after_link' style='padding: 10px 15px;'> \
+                      <a href='" + url_menu_list + "' data-toggle='tooltip' title='' class='btn btn-primary' data-original-title='Перейти к списку меню'>Перейти к списку меню</a> \
+                      <br><br> \
+                      <a id='addOneMoreMenuItem' href='{{ addmenuitem }}'  data-toggle='tooltip' title='' class='btn btn-primary' data-original-title='Добавить еще пункт меню'><i class='fa fa-plus'></i> Добавить еще пункт меню</a> \
+                    </div>");
+
+
+                  var menu_id = $("#menu_for_item").val();
+                  var url="{{ getmenuitem }}";
+
+                  $.ajax({
+                    type: 'POST',
+                    url: url,
+                    data: ({menu_id : menu_id}),
+                    dataType: 'json',
+                    success: function(data){
+                      if(data.success){
+                          $("#parent_menu_item").html('').html(data.item);
+                      }
+                    }
+                  });
+              }
+              $(".breadcrumb").after("<div class='alert alert-success alert-dismissible'><i class='fa fa-check-circle'></i>"+data.message+"<button type='button' class='close' data-dismiss='alert'>×</button></div>");
+
+            } else {
+                $(".breadcrumb").after("<div class='alert alert-warning alert-dismissible'>Произошла ошибка. Пункт меню не добавлен/обновлен! Возможно пункт меню с таким <strong>seo url</strong> уже есть в базе!<button type='button' class='close' data-dismiss='alert'>×</button></div></div>");
+
+            }
+          }
+        });
+    }
+
+
+});
+
+
+$("#addOneMoreMenuItem").on('click', function(eventObject){
+    eventObject.preventDefault();
+    $("#after_link").remove();
+    $("#addMenuItemForm").slideDown(300);
+    $("#link_text").val('').focus();
+    $("#attr_title").val('');
+    $("#href").val('');
+    $("#menu_for_item").val(0);
+    $("#parent_menu_item").val(0);
+    $("#seo_url").val('');
+    $("#target").val('');
+    $("#sortMenu").val('');
+    $("#class_menu_item").val('');
+    $("#status option:first").attr('selected','selected');
+});
+
+}); // Ready
+</script>
+
+
+{{ footer }}

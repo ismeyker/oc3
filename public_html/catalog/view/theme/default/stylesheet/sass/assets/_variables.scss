@@ -1,0 +1,58 @@
+//Все переменные объявляем здесь
+$body_bg: #fff;
+
+$body_fontFamily: 'Open Sans', sans-serif;
+$h_fontFamily: 'Open Sans', sans-serif;
+
+$txt_fs: 12px;
+$txt_lineHeight: 1.5;
+
+$txt_clr: #666;
+$txt_clrTransp: lighten($txt_clr, 50%);
+
+$txt_selBg: #23a1d1;
+$txt_selClr: #fff;
+
+$a_clr: #23a1d1;
+$a_clrHoverFocus: #0064b9;
+$a_txtDecoration: none;
+$a_txtDecorationHoverFocus: none;
+
+$h1_fs: 33px;
+$h2_fs: 27px;
+$h3_fs: 21px;
+$h4_fs: 15px;
+$h5_fs: 12px;
+$h6_fs: 10px;
+
+$h_clr: #444;
+
+$main_menu_fontFamily: 'Cuprum', sans-serif;
+$main_menu_fs: 18px;
+$main_menu_fs_lev2: 16px;
+$main_menu_clr: #fff;
+$main_menu_clrHover: #443e45;
+$main_menu_bgHover: transparent;
+
+$side_menu_fontFamily: 'Cuprum', sans-serif;
+$side_menu_fs: 16px;
+$side_menu_fs_lev2: 14px;
+$side_menu_clr: #fff;
+$side_menu_clr_HoverFocus: #443e45;
+
+$border: 1px solid #e7e7e7;
+$borderHover: 1px solid #fff;
+$borderRadius: 5px;
+
+$input_border: 1px solid #e7e7e7;
+$input_clr: #000;
+
+$input_submit_border: none;
+$input_submit_borderRadius: 5px;
+$input_submit_bg: #88b145;
+$input_submit_clr: #fff;
+$input_submit_clrHoverFocus: #fff;
+$input_submit_bgHoverFocus: #ffe877;
+
+
+$bootstrap_bg: #88b145;

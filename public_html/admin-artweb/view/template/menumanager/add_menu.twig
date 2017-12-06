@@ -1,0 +1,265 @@
+{{ header }}
+{{ column_left }}
+<div id="content">
+  <div class="breadcrumb">
+    {% for breadcrumb in breadcrumbs %}
+    {{ breadcrumb.separator }}<a href="{{ breadcrumb.href }}">{{ breadcrumb.text }}</a>
+    {% endfor %}
+  </div>
+
+  {% if error_warning %}
+   <div class="warning">{{ error_warning }}</div>
+  {% endif %}
+  {% if success %}
+    <div class="success">{{ success }}</div>
+  {% endif %}
+
+  <div class="page-header">
+    <div class="container-fluid">
+      <div class="pull-right">
+        {% if not menuInfo %}
+        <button id="addMenu" data-toggle="tooltip" class="btn btn-primary" data-original-title="Сохранить"><i class="fa fa-save"></i></button>
+        {% else %}
+        <button id="changeMenu" data-toggle="tooltip" class="btn btn-primary" data-original-title="Сохранить"><i class="fa fa-save"></i></button>
+        {% endif %}
+
+        <a href="{{ cancel }}" data-toggle="tooltip" title="" class="btn btn-default" data-original-title="Отменить"><i class="fa fa-reply"></i></a>
+
+      </div>
+      <h1>{{ heading_title }}</h1>
+    </div>
+  </div>
+
+
+  <div class="container-fluid">
+    <div class="content panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title"><i class="fa fa-pencil"></i> {{ heading_title }}</h3>
+
+
+
+      </div>
+
+
+
+      <form method="post" enctype="multipart/form-data" id="addMenuForm" class="form-horizontal">
+        <div class="form-group required">
+          <label for="menu_name" class="col-sm-2 control-label">Заголовок</label>
+          <div class="col-sm-10">
+             <input type="text" id="menu_name" class="form-control" value="{{ menuInfo.name ? menuInfo.name : '' }}" />
+          </div>
+        </div>
+
+
+
+        <div class="form-group">
+          <label for="menu_desc" class="col-sm-2 control-label">Описание</label>
+          <div class="col-sm-10">
+             <textarea id="menu_desc"  class="form-control">{{ menuInfo.info ? menuInfo.info : '' }}</textarea>
+          </div>
+        </div>
+
+
+        <div class="form-group">
+          <label for="menu_name" class="col-sm-2 control-label">Класс</label>
+          <div class="col-sm-10">
+             <input type="text" id="menu_class" class="form-control" value="{{ menuInfo.class ? menuInfo.class : '' }}" />
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script><!--
+$(document).ready(function(){
+
+$('#addMenu, #changeMenu').click(function(eventObject){
+    eventObject.preventDefault();
+    $(".error").remove();
+
+    if($(this).attr('id')=='addMenu'){
+        var action = 'add';
+        var id = false;
+    } else if($(this).attr('id')=='changeMenu'){
+        var action = 'change';
+        var id = "{{ menuInfo.id ? menuInfo.id : 'false' }}";
+    }
+
+    var menu_name=$("#menu_name");
+    var menu_desc=$("#menu_desc");
+    var menu_class=$("#menu_class");
+    var url= '{{ addmenu }}';
+    var url_menu_list="{{ url_menu_list }}";
+
+    var errFlag = true;
+
+    if(menu_name.val().length!=''){
+        if(menu_name.val().length<=100){
+            errFlag = true;
+        } else {
+            errFlag = false;
+            menu_name.after('<div class="error" style="color: #A60000;">Максимальная длина поля 100 символов</div>');
+        }
+    } else {
+        errFlag = false;
+        menu_name.after("<div class='error' style='color: #A60000;'>Заполните поле</div>");
+    }
+
+    if(menu_desc.val()!=''){
+        if(menu_desc.val().length<=100){
+            errFlag = true;
+        } else {
+            errFlag = false;
+            menu_desc.after("<div class='error' style='color: #A60000;'>Максимальная длина поля 255 символов</div>");
+        }
+    }
+
+    if(errFlag){
+        $.ajax({
+                type: 'POST',
+                url: url,
+                data: ({menu_name:menu_name.val(),
+                         menu_desc : menu_desc.val(),
+                         menu_class : menu_class.val(),
+                         action : action,
+                         id : id
+                         }),
+                dataType: 'json',
+                success: function(data){
+                    $(".success, .warning").remove();
+                    if(data.success){
+                        if(action=='add'){
+                            $("#addMenuForm").slideUp(300);
+                            $(".content").prepend("<div id='after_link' style='padding: 10px 15px;'> \
+                              <a href='"+url_menu_list+"' data-toggle='tooltip' title='' class='btn btn-primary' data-original-title='Перейти к списку меню'>Перейти к списку меню</a>\
+                              <br><br>\
+                              <a id='addOneMoreMenu' href='#'>Добавить еще меню</a></div>");
+                        }
+
+                        $(".breadcrumb").after("<div class='success'>"+data.message+"</div>");
+                    } else {
+                        $(".breadcrumb").after("<div class='warning'>Произошла ошибка. Меню не добавлено/обновлено!</div>");
+                    }
+                },
+                error: function(req, err){
+                  console.log(err);
+                }
+        });
+    }
+
+
+});
+
+$("#addOneMoreMenu").on('click', function(eventObject){
+    eventObject.preventDefault();
+    $("#after_link").remove();
+    $("#addMenuForm").slideDown(300);
+    $("#menu_name").val('').focus();
+    $("#menu_desc").val('');
+});
+
+});
+// Ready
+</script>
+
+
+<script type="text/javascript"><!--
+function filter() {
+	url = 'index.php?route=catalog/product&token={{ token }}';
+
+	var filter_name = $('input[name=\'filter_name\']').attr('value');
+
+	if (filter_name) {
+		url += '&filter_name=' + encodeURIComponent(filter_name);
+	}
+
+	var filter_model = $('input[name=\'filter_model\']').attr('value');
+
+	if (filter_model) {
+		url += '&filter_model=' + encodeURIComponent(filter_model);
+	}
+
+	var filter_price = $('input[name=\'filter_price\']').attr('value');
+
+	if (filter_price) {
+		url += '&filter_price=' + encodeURIComponent(filter_price);
+	}
+
+	var filter_quantity = $('input[name=\'filter_quantity\']').attr('value');
+
+	if (filter_quantity) {
+		url += '&filter_quantity=' + encodeURIComponent(filter_quantity);
+	}
+
+	var filter_status = $('select[name=\'filter_status\']').attr('value');
+
+	if (filter_status != '*') {
+		url += '&filter_status=' + encodeURIComponent(filter_status);
+	}
+
+	location = url;
+}
+//--></script>
+<script type="text/javascript"><!--
+$('#form input').keydown(function(e) {
+	if (e.keyCode == 13) {
+		filter();
+	}
+});
+//--></script>
+<script type="text/javascript"><!--
+$('input[name=\'filter_name\']').autocomplete({
+	delay: 0,
+	source: function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&token={{ token }}&filter_name=' +  encodeURIComponent(request.term),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item.name,
+						value: item.product_id
+					}
+				}));
+			}
+		});
+	},
+	select: function(event, ui) {
+		$('input[name=\'filter_name\']').val(ui.item.label);
+
+		return false;
+	},
+	focus: function(event, ui) {
+      	return false;
+   	}
+});
+
+$('input[name=\'filter_model\']').autocomplete({
+	delay: 0,
+	source: function(request, response) {
+		$.ajax({
+			url: 'index.php?route=catalog/product/autocomplete&token={{ token }}&filter_model=' +  encodeURIComponent(request.term),
+			dataType: 'json',
+			success: function(json) {
+				response($.map(json, function(item) {
+					return {
+						label: item.model,
+						value: item.product_id
+					}
+				}));
+			}
+		});
+	},
+	select: function(event, ui) {
+		$('input[name=\'filter_model\']').val(ui.item.label);
+
+		return false;
+	},
+	focus: function(event, ui) {
+      	return false;
+   	}
+});
+//--></script>
+{{ footer }}
